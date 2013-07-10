@@ -103,7 +103,7 @@ void MainWindow::cmdSlot()
 
     encode (bufferIn, bufferOut);
 #if 0
-    int val;
+    quint8 val;
     QDebug debug = qDebug();
     foreach (val, bufferOut) {
         debug << hex << val ;
