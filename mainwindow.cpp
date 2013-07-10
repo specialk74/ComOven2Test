@@ -85,14 +85,8 @@ void MainWindow::cmdSlot()
         debug << hex << val ;
     }
 #endif
-    QString testo = "Tx:";
-    int var;
-    foreach (var, bufferOut) {
-        testo.append(QString(" %1").arg(var,0, 16));
-    }
 
-    ui->plainTextEdit->appendPlainText(testo);
-
+    insertBufferOnPlainText (bufferOut, "Tx: ");
     m_socket.write(bufferOut);
 }
 
@@ -110,13 +104,17 @@ void MainWindow::readyRead()
     static STATO_DECODER_TCPIP_MSG stato = STATO_TCPIP_DLE_STX;
 
     if (decodeTcpIpMsg(bufferAll, decode, idx, stato))
-    {
-        QString testo = "Rx:";
-        int var;
-        foreach (var, bufferAll) {
-            testo.append(QString(" %1").arg(var,0, 16));
-        }
+        insertBufferOnPlainText (bufferAll, "Rx: ");
+}
 
-        ui->plainTextEdit->appendPlainText(testo);
+void MainWindow::insertBufferOnPlainText (const QByteArray& buffer, const QString& header)
+{
+    quint8 var;
+    QString testo = header;
+    QChar carFill = '0';
+    foreach (var, buffer) {
+        testo.append(QString(" %1").arg(var, 2, 16, carFill));
     }
+
+    ui->plainTextEdit->appendPlainText(testo);
 }

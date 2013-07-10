@@ -28,6 +28,9 @@ private:
     Ui::MainWindow *ui;
     QTcpSocket m_socket;
     QTimer m_timer;
+
+    void insertBufferOnPlainText (const QByteArray& buffer, const QString& testo);
+
 };
 
 #endif // MAINWINDOW_H
