@@ -70,11 +70,35 @@ void MainWindow::cmdSlot()
     }
     else if (button == ui->cmd2Button)
     {
-
+        stream << (quint8) 0;
+        quint32 lunghezza = _htonl(17);
+        stream << (quint32) lunghezza;
+        quint32 id = _htonl(0x02);
+        stream << (quint32) id;
+        stream << (quint8) 7; // 0
+        stream << (quint8) 6; // 1
+        stream << (quint8) 5; // 2
+        stream << (quint8) 4; // 3
+        stream << (quint8) 3; // 4
+        stream << (quint8) 2; // 5
+        stream << (quint8) 1; // 6
+        stream << (quint8) 0; // 7
     }
     else if (button == ui->cmd3Button)
     {
-
+        stream << (quint8) 0;
+        quint32 lunghezza = _htonl(17);
+        stream << (quint32) lunghezza;
+        quint32 id = _htonl(0x01);
+        stream << (quint32) id;
+        stream << (quint8) 0; // 0
+        stream << (quint8) 1; // 1
+        stream << (quint8) 2; // 2
+        stream << (quint8) 3; // 3
+        stream << (quint8) 4; // 4
+        stream << (quint8) 5; // 5
+        stream << (quint8) 6; // 6
+        stream << (quint8) 7; // 7
     }
 
     encode (bufferIn, bufferOut);
