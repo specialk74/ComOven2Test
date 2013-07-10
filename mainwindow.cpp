@@ -73,7 +73,7 @@ void MainWindow::cmdSlot()
         stream << (quint8) 0;
         quint32 lunghezza = _htonl(17);
         stream << (quint32) lunghezza;
-        quint32 id = _htonl(0x02);
+        quint32 id = _htonl(0x87654321);
         stream << (quint32) id;
         stream << (quint8) 7; // 0
         stream << (quint8) 6; // 1
@@ -89,7 +89,7 @@ void MainWindow::cmdSlot()
         stream << (quint8) 0;
         quint32 lunghezza = _htonl(17);
         stream << (quint32) lunghezza;
-        quint32 id = _htonl(0x01);
+        quint32 id = _htonl(0x12345678);
         stream << (quint32) id;
         stream << (quint8) 0; // 0
         stream << (quint8) 1; // 1
