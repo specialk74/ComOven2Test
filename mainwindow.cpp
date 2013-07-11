@@ -3,6 +3,8 @@
 #include "utils.h"
 #include <QHostAddress>
 
+static quint32 countTxRx = 0;
+
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
     ui(new Ui::MainWindow)
@@ -13,6 +15,7 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(ui->cmd1Button, SIGNAL(clicked()), this, SLOT(cmdSlot()));
     connect(ui->cmd2Button, SIGNAL(clicked()), this, SLOT(cmdSlot()));
     connect(ui->cmd3Button, SIGNAL(clicked()), this, SLOT(cmdSlot()));
+    connect(ui->clearButton, SIGNAL(clicked()), ui->plainTextEdit, SLOT(clear()));
 
     connect (&m_socket, SIGNAL(connected()), this, SLOT(setTextConnectButton()));
     connect (&m_socket, SIGNAL(disconnected()), this, SLOT(setTextConnectButton()));
@@ -73,7 +76,8 @@ void MainWindow::cmdSlot()
         stream << (quint8) 0;
         quint32 lunghezza = _htonl(17);
         stream << (quint32) lunghezza;
-        quint32 id = _htonl(0x87654321);
+//        quint32 id = _htonl(0x87654321);
+        quint32 id = _htonl(0x08fff000);
         stream << (quint32) id;
         stream << (quint8) 7; // 0
         stream << (quint8) 6; // 1
@@ -136,6 +140,10 @@ void MainWindow::insertBufferOnPlainText (const QByteArray& buffer, const QStrin
     quint8 var;
     QString testo = header;
     QChar carFill = '0';
+    if (countTxRx >= 100)
+        countTxRx = 0;
+    QString counter = QString (" %1 - ").arg(countTxRx++, 2, 10, carFill);
+    testo.append(counter);
     foreach (var, buffer) {
         testo.append(QString(" %1").arg(var, 2, 16, carFill));
     }
