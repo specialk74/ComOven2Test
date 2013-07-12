@@ -23,11 +23,14 @@ protected slots:
     void cmdSlot();
     void erroSocketSlot(QAbstractSocket::SocketError);
     void readyRead();
+    void sendCmd1();
 
 private:
     Ui::MainWindow *ui;
     QTcpSocket m_socket;
     QTimer m_timer;
+    QTimer m_timerSend;
+    bool m_TimerAttivo;
 
     void insertBufferOnPlainText (const QByteArray& buffer, const QString& testo);
 

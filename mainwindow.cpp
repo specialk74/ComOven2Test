@@ -16,6 +16,7 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(ui->cmd2Button, SIGNAL(clicked()), this, SLOT(cmdSlot()));
     connect(ui->cmd3Button, SIGNAL(clicked()), this, SLOT(cmdSlot()));
     connect(ui->clearButton, SIGNAL(clicked()), ui->plainTextEdit, SLOT(clear()));
+    connect(ui->addressServer, SIGNAL(editingFinished()), this, SLOT(connectSlot()));
 
     connect (&m_socket, SIGNAL(connected()), this, SLOT(setTextConnectButton()));
     connect (&m_socket, SIGNAL(disconnected()), this, SLOT(setTextConnectButton()));
@@ -23,6 +24,8 @@ MainWindow::MainWindow(QWidget *parent) :
     connect (&m_socket, SIGNAL(error(QAbstractSocket::SocketError)), this, SLOT(erroSocketSlot(QAbstractSocket::SocketError)));
 
     connect (&m_timer, SIGNAL(timeout()), this, SLOT(connectSlot()));
+    connect (&m_timerSend, SIGNAL(timeout()), this, SLOT(sendCmd1()));
+    m_TimerAttivo = false;
 }
 
 MainWindow::~MainWindow()
@@ -49,7 +52,11 @@ void MainWindow::connectSlot()
 void MainWindow::setTextConnectButton()
 {
     if (m_socket.isOpen())
+    {
+        m_socket.setSocketOption(QAbstractSocket::KeepAliveOption, 1);
+        m_socket.setSocketOption(QAbstractSocket::LowDelayOption, 1);
         ui->connectButton->setText(tr("&Disconnect"));
+    }
     else
         ui->connectButton->setText(tr("&Connect"));
 }
@@ -73,6 +80,19 @@ void MainWindow::cmdSlot()
     }
     else if (button == ui->cmd2Button)
     {
+        if (m_TimerAttivo)
+        {
+            m_TimerAttivo = false;
+            m_timerSend.stop();
+        }
+        else
+        {
+            m_TimerAttivo = true;
+            m_timerSend.start(100);
+        }
+
+        return;
+
         stream << (quint8) 0;
         quint32 lunghezza = _htonl(17);
         stream << (quint32) lunghezza;
@@ -118,8 +138,9 @@ void MainWindow::cmdSlot()
     m_socket.write(bufferOut);
 }
 
-void MainWindow::erroSocketSlot(QAbstractSocket::SocketError)
+void MainWindow::erroSocketSlot(QAbstractSocket::SocketError err)
 {
+    qDebug() << err;
     m_timer.start(1000);
 }
 
@@ -149,4 +170,34 @@ void MainWindow::insertBufferOnPlainText (const QByteArray& buffer, const QStrin
     }
 
     ui->plainTextEdit->appendPlainText(testo);
+}
+
+void MainWindow::sendCmd1()
+{
+    if (!m_socket.isOpen())
+        return;
+
+    QByteArray bufferOut;
+    QByteArray bufferIn;
+    QDataStream stream(&bufferIn, QIODevice::WriteOnly);
+    // Lo trasformo in modo che i Client possano leggerlo corretamente
+
+    stream << (quint8) 0;
+    quint32 lunghezza = _htonl(17);
+    stream << (quint32) lunghezza;
+    //        quint32 id = _htonl(0x87654321);
+    quint32 id = _htonl(0x08fff000);
+    stream << (quint32) id;
+    stream << (quint8) 7; // 0
+    stream << (quint8) 6; // 1
+    stream << (quint8) 5; // 2
+    stream << (quint8) 4; // 3
+    stream << (quint8) 3; // 4
+    stream << (quint8) 2; // 5
+    stream << (quint8) 1; // 6
+    stream << (quint8) 0; // 7
+    encode (bufferIn, bufferOut);
+
+    insertBufferOnPlainText (bufferOut, "Tx: ");
+    m_socket.write(bufferOut);
 }
